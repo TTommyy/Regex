@@ -1,7 +1,7 @@
 module Sardin(main) where
 
-import Regex(generateSetFromRegex)
-import SetOperations(isSetOfWordsUniqulyDecodable)
+import Regex (generateSetFromRegex)
+import SetOperations (isSetOfWordsUniqulyDecodable)
 import Data.Set (Set, fromList)
 
 main :: IO ()

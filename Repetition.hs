@@ -11,6 +11,7 @@ import Operations(addRepetitionsToSet
                  ,addMultipleRangeRepetitionsToSet
                  ,generateRange)
 
+import Parsing(range)
 import Data.Char (isDigit)
 import Data.List (elemIndex)
 
@@ -21,19 +22,16 @@ readDigit res s
   | isDigit (head s) = readDigit (res ++ [head s]) (tail s)
   | otherwise = (read res, s)
 
-range :: Char -> String -> Bool
-range f s = f == '[' && head (tail s) == '-'
-
 splitOnNearest :: Char -> String -> (String, String)
 splitOnNearest c str =
   case elemIndex c str of
     Just index ->  let (before, after) = splitAt index str in (before, tail after)
     Nothing -> ([],[])
 
-updateOneRangeRepetiton :: [String] -> String -> [String]
-updateOrGroupRangeRepetition :: [String] -> String -> [String]
-updateOneRepetition :: [String] -> String -> [String]
-updateOrGroupRepetition :: [String] -> String -> [String]
+updateOneRangeRepetiton       :: [String] -> String -> [String]
+updateOrGroupRangeRepetition  :: [String] -> String -> [String]
+updateOneRepetition           :: [String] -> String -> [String]
+updateOrGroupRepetition       :: [String] -> String -> [String]
 
 updateOneRangeRepetiton res (h:t) = do
   let (n, tt) = readDigit [] (tail t)
@@ -55,7 +53,7 @@ updateOneRepetition res (h:t) = do
 
 updateOrGroupRepetition res (h:t) = do
   let (before, after) = splitOnNearest ']' t
-  let (n, tt) = readDigit [](tail after)
+  let (n, tt) = readDigit [] (tail after)
   if range h t then do
    addMultipleRangeRepetitionsToSet res (generateRange before) (n, n)
   else do

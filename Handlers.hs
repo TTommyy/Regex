@@ -1,39 +1,66 @@
-module Handlers(OperationType(ADD, ANY_DIGIT, ANY_NOT_DIGIT, ANY_ALPHA,
-                     ANY_NOT_ALPHA, ANY_WHITE, ANY_NOT_WHITE,
-                     ADD_ANY, ADD_OPT, ADD_OR, ADD_NOT_OR,
-                     ADD_NOT_OR_RANGE,
-                     ADD_RANGE, ADD_ONE_RANGE_REPETITION,
-                     ADD_OR_GROUP_RANGE_REPETITION,
-                     ADD_ONE_REPETITION, ADD_OR_GROUP_REPETITION,
-                     ADD_PIPE_GROUP ,ESCAPE),
-                handleOneRangeRepetition,
-                handleOrGroupRangeRepetition,handleOneRepetition,
-                handleOrGroupRepetition, handleNotOrGroup, handleNotOrRangeGroup,
-                handlePipeGroup, handleOrGroup,
-                handleOrdinaryOrRangeGroup) where
+module Handlers(OperationType(
+                      ADD
+                     ,ANY_DIGIT
+                     ,ANY_NOT_DIGIT
+                     ,ANY_ALPHA
+                     ,ANY_NOT_ALPHA
+                     ,ANY_WHITE
+                     ,ANY_NOT_WHITE
+                     ,ADD_ANY
+                     ,ADD_OPT
+                     ,ADD_OR
+                     ,ADD_NOT_OR
+                     ,ADD_NOT_OR_RANGE
+                     ,ADD_RANGE
+                     ,ADD_ONE_RANGE_REPETITION
+                     ,ADD_OR_GROUP_RANGE_REPETITION
+                     ,ADD_ONE_REPETITION
+                     ,ADD_OR_GROUP_REPETITION
+                     ,ADD_PIPE_GROUP
+                     ,ESCAPE)
+                ,handleOneRangeRepetition
+                ,handleOrGroupRangeRepetition
+                ,handleOneRepetition
+                ,handleOrGroupRepetition
+                ,handleNotOrGroup
+                ,handleNotOrRangeGroup
+                ,handlePipeGroup
+                ,handleOrGroup
+                ,handleOrdinaryOrRangeGroup) where
 
-import Data.Char (ord, chr, isAlphaNum, isAlpha, isDigit, isSpace)
 import Data.List (elemIndex)
 
-data OperationType = ADD| ANY_DIGIT| ANY_NOT_DIGIT| ANY_ALPHA|
-                     ANY_NOT_ALPHA| ANY_WHITE| ANY_NOT_WHITE|
-                     ADD_ANY| ADD_OPT| ADD_OR| ADD_NOT_OR| ADD_NOT_OR_RANGE|
-                     ADD_RANGE| ADD_ONE_RANGE_REPETITION|
-                     ADD_OR_GROUP_RANGE_REPETITION|
-                     ADD_ONE_REPETITION| ADD_OR_GROUP_REPETITION|
-                     ADD_PIPE_GROUP| ESCAPE
+data OperationType = ADD
+                    |ANY_DIGIT
+                    |ANY_NOT_DIGIT
+                    |ANY_ALPHA
+                    |ANY_NOT_ALPHA
+                    |ANY_WHITE
+                    |ANY_NOT_WHITE
+                    |ADD_ANY
+                    |ADD_OPT
+                    |ADD_OR
+                    |ADD_NOT_OR
+                    |ADD_NOT_OR_RANGE
+                    |ADD_RANGE
+                    |ADD_ONE_RANGE_REPETITION
+                    |ADD_OR_GROUP_RANGE_REPETITION
+                    |ADD_ONE_REPETITION
+                    |ADD_OR_GROUP_REPETITION
+                    |ADD_PIPE_GROUP
+                    |ESCAPE
                 deriving (Eq)
 
-handleOneRangeRepetition :: String -> (OperationType, String, String)
-handleOrGroupRangeRepetition :: String -> (OperationType, String, String)
-handleOneRepetition :: String -> (OperationType, String, String)
-handleOrGroupRepetition :: String -> (OperationType, String, String)
+handleOneRangeRepetition      :: String -> (OperationType, String, String)
+handleOrGroupRangeRepetition  :: String -> (OperationType, String, String)
+handleOneRepetition           :: String -> (OperationType, String, String)
+handleOrGroupRepetition       :: String -> (OperationType, String, String)
 
-handleNotOrGroup :: String -> (OperationType, String, String)
-handlePipeGroup :: String -> (OperationType, String, String)
-handleOrGroup :: String -> (OperationType, String, String)
-handleNotOrRangeGroup :: String -> (OperationType, String, String)
-handleOrdinaryOrRangeGroup :: String -> (OperationType, String, String)
+handleNotOrGroup            :: String -> (OperationType, String, String)
+handlePipeGroup             :: String -> (OperationType, String, String)
+handleOrGroup               :: String -> (OperationType, String, String)
+handleNotOrRangeGroup       :: String -> (OperationType, String, String)
+handleOrdinaryOrRangeGroup  :: String -> (OperationType, String, String)
 
 -- helpers --
 splitOnNearest :: Char -> String -> (String, String)
@@ -46,11 +73,9 @@ findClosingParenthees :: (Int, Int) -> String -> String -> (String, String)
 findClosingParenthees (_, _) [] acc = error ("(" ++ acc ++ " have no closing )")
 findClosingParenthees (op, cl) (h:t) acc
   | h == ')' && (op - 1) == cl = (acc, t)
-  | h == ')' = findClosingParenthees (op, cl + 1) t (acc++[h])
-  | h == '(' = findClosingParenthees (op + 1, cl) t (acc++[h])
-  | otherwise = findClosingParenthees (op, cl) t (acc++[h])
-
-
+  | h == ')'                   = findClosingParenthees (op, cl + 1) t (acc++[h])
+  | h == '('                   = findClosingParenthees (op + 1, cl) t (acc++[h])
+  | otherwise                  = findClosingParenthees (op, cl) t (acc++[h])
 
 -- Handlers --
 

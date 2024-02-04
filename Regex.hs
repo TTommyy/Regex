@@ -37,10 +37,7 @@ import Operations
       ,addNotORGroupToSet
       ,addORRangeGroupToSet
       ,addNotORRangeGroupToSet
-      ,addRepetitionsToSet
-      ,addRangeRepetitionsToSet
-      ,addOptionalToSet
-      ,generateRange)
+      ,addOptionalToSet)
 
 import Handlers
     (OperationType(ADD
@@ -82,60 +79,54 @@ import CharFunctions(allASCIICharacters
                     ,digits
                     ,whiteSpaces)
 
--- Helpers --
-splitOnNearest :: Char -> String -> (String, String)
-splitOnNearest c str =
-  case elemIndex c str of
-    Just index ->  let (before, after) = splitAt index str in (before, tail after)
-    Nothing -> error ("Closing of " ++ [c] ++ " not found. Wrong regex")
-
 -- Genertion --
-match :: String -> (OperationType, String,String) -- type, group, rest
+match :: String -> (OperationType, String, String) -- type, group, rest
 match [a]
-  | normalChar a = (ADD, [a], [])
-  | anyChar a = (ADD_ANY, [a], [])
-  | otherwise = error ("NOT SUPPORTED: " ++ [a])
+  | normalChar a =  (ADD, [a], [])
+  | anyChar a    =  (ADD_ANY, [a], [])
+  | otherwise    =  error ("Wrong regex ending: " ++ [a])
 match (h : t)
 -- Firstly we check most sofisticated repetitions.
-  | oneRangeRepetition h t = handleOneRangeRepetition (h:t)
-  | orGroupRepetitionRange h t = handleOrGroupRangeRepetition (h:t)
-  | oneRepetition h t = handleOneRepetition (h:t)
-  | orGroupRepetition h t  = handleOrGroupRepetition (h:t)
+  | oneRangeRepetition h t      =  handleOneRangeRepetition (h:t)
+  | orGroupRepetitionRange h t  =  handleOrGroupRangeRepetition (h:t)
+  | oneRepetition h t           =  handleOneRepetition (h:t)
+  | orGroupRepetition h t       =  handleOrGroupRepetition (h:t)
 -- Then 2 args fun --
-  | anyDigit h t = (ANY_DIGIT, [head t], tail t)
-  | anyNotDigit h t = (ANY_NOT_DIGIT, [head t], tail t)
-  | anyAlpha h t = (ANY_ALPHA, [head t], tail t)
-  | anyNotAlpha h t = (ANY_NOT_ALPHA, [head t], tail t)
-  | anyWhite h t = (ANY_WHITE, [head t], tail t)
-  | anyNotWhite h t = (ANY_NOT_WHITE, [head t], tail t)
-  | optionalChar h t  = (ADD_OPT, [h], tail t)
-  | range h t = handleOrdinaryOrRangeGroup t
-  | notOrRangeGroup h t = handleNotOrRangeGroup (tail t)
-  | notOrGroup h t = handleNotOrGroup (tail t)
+  | anyDigit h t         =  (ANY_DIGIT, [head t], tail t)
+  | anyNotDigit h t      =  (ANY_NOT_DIGIT, [head t], tail t)
+  | anyAlpha h t         =  (ANY_ALPHA, [head t], tail t)
+  | anyNotAlpha h t      =  (ANY_NOT_ALPHA, [head t], tail t)
+  | anyWhite h t         =  (ANY_WHITE, [head t], tail t)
+  | anyNotWhite h t      =  (ANY_NOT_WHITE, [head t], tail t)
+  | optionalChar h t     =  (ADD_OPT, [h], tail t)
+  | range h t            =  handleOrdinaryOrRangeGroup t
+  | notOrRangeGroup h t  =  handleNotOrRangeGroup (tail t)
+  | notOrGroup h t       =  handleNotOrGroup (tail t)
   -- and one args fun
-  | pipeGroup h = handlePipeGroup t
-  | anyChar h = (ADD_ANY, [h], t)
-  | normalChar h = (ADD, [h], t)
-  | orGroup h = handleOrGroup t
-  | escapeChar h = (ESCAPE, [head t], tail t)
-  | otherwise = error ("NOT SUPPORTED: " ++ [h] ++ t)
+  | pipeGroup h   =  handlePipeGroup t
+  | anyChar h     =  (ADD_ANY, [h], t)
+  | orGroup h     =  handleOrGroup t
+  | escapeChar h  =  (ESCAPE, [head t], tail t)
+  | normalChar h  =  (ADD, [h], t)
+  | otherwise     =  error ("NOT SUPPORTED: " ++ h:t)
 
+-- Pipe Group handlers --
+findfirstGoodPipe  :: (Int, Int) -> String -> String -> (String, String)
+splitOn            :: Char -> String -> String -> [String] -> [String]
+updatePipeGroup    :: [String] -> String -> [String]
 
-findfirstGoodPipe :: (Int, Int) -> String -> String -> (String, String)
 findfirstGoodPipe (_, _) [] acc = error (acc ++ " have no Pipe |")
 findfirstGoodPipe (op, cl) (h:t) acc
-  | h == '(' = findfirstGoodPipe (op + 1, cl) t (acc++[h])
-  | h == ')' = findfirstGoodPipe (op, cl + 1) t (acc++[h])
+  | h == '('             = findfirstGoodPipe (op + 1, cl) t (acc++[h])
+  | h == ')'             = findfirstGoodPipe (op, cl + 1) t (acc++[h])
   | h == '|' && op == cl = (acc, t)
-  | otherwise = findfirstGoodPipe (op, cl) t (acc++[h])
+  | otherwise            = findfirstGoodPipe (op, cl) t (acc++[h])
 
-splitOn :: Char -> String -> String -> [String] -> [String]
 splitOn _ [] acc res = acc : res
 splitOn c (h:t) acc res = do
   if h == '|' then splitOn c t [] [acc]++res
   else splitOn c t (acc++[h]) res
 
-updatePipeGroup :: [String] -> String -> [String]
 updatePipeGroup res pipeGroup
   | '|' `notElem` pipeGroup = error "Wrong regex! () dont have | inside!"
   | '(' `notElem` pipeGroup = do
@@ -147,25 +138,25 @@ updatePipeGroup res pipeGroup
 
 updateSet :: [String] -> (OperationType, String) -> [String]
 updateSet res (operation, group)
-  | operation == ADD_ONE_RANGE_REPETITION = updateOneRangeRepetiton res group
-  | operation == ADD_OR_GROUP_RANGE_REPETITION = updateOrGroupRangeRepetition res group
-  | operation == ADD_ONE_REPETITION = updateOneRepetition res group
-  | operation == ADD_OR_GROUP_REPETITION = updateOrGroupRepetition res group
-  | operation == ADD = Operations.addToSet res group
-  | operation == ANY_DIGIT = Operations.addORGroupToSet res digits
-  | operation == ANY_NOT_DIGIT = Operations.addNotORGroupToSet res digits
-  | operation == ANY_ALPHA = Operations.addORGroupToSet res allAlphaNum
-  | operation == ANY_NOT_ALPHA = Operations.addNotORGroupToSet res allAlphaNum
-  | operation == ANY_WHITE  = Operations.addORGroupToSet res whiteSpaces
-  | operation == ANY_NOT_WHITE = Operations.addNotORGroupToSet res whiteSpaces
-  | operation == ADD_ANY = Operations.addORGroupToSet res allASCIICharacters
-  | operation == ADD_OPT = Operations.addOptionalToSet res group
-  | operation == ADD_OR = Operations.addORGroupToSet res group
-  | operation == ADD_NOT_OR = Operations.addNotORGroupToSet res group
-  | operation == ADD_NOT_OR_RANGE = Operations.addNotORRangeGroupToSet res group
-  | operation == ADD_RANGE = Operations.addORRangeGroupToSet res group
-  | operation == ADD_PIPE_GROUP = updatePipeGroup res group
-  | operation == ESCAPE = Operations.addToSet res group
+  | operation == ADD                           =  Operations.addToSet res group
+  | operation == ANY_DIGIT                     =  Operations.addORGroupToSet res digits
+  | operation == ANY_NOT_DIGIT                 =  Operations.addNotORGroupToSet res digits
+  | operation == ANY_ALPHA                     =  Operations.addORGroupToSet res allAlphaNum
+  | operation == ANY_NOT_ALPHA                 =  Operations.addNotORGroupToSet res allAlphaNum
+  | operation == ANY_WHITE                     =  Operations.addORGroupToSet res whiteSpaces
+  | operation == ANY_NOT_WHITE                 =  Operations.addNotORGroupToSet res whiteSpaces
+  | operation == ADD_ANY                       =  Operations.addORGroupToSet res allASCIICharacters
+  | operation == ADD_OPT                       =  Operations.addOptionalToSet res group
+  | operation == ADD_OR                        =  Operations.addORGroupToSet res group
+  | operation == ADD_NOT_OR                    =  Operations.addNotORGroupToSet res group
+  | operation == ADD_NOT_OR_RANGE              =  Operations.addNotORRangeGroupToSet res group
+  | operation == ADD_RANGE                     =  Operations.addORRangeGroupToSet res group
+  | operation == ESCAPE                        =  Operations.addToSet res group
+  | operation == ADD_ONE_RANGE_REPETITION      =  Repetition.updateOneRangeRepetiton res group
+  | operation == ADD_OR_GROUP_RANGE_REPETITION =  Repetition.updateOrGroupRangeRepetition res group
+  | operation == ADD_ONE_REPETITION            =  Repetition.updateOneRepetition res group
+  | operation == ADD_OR_GROUP_REPETITION       =  Repetition.updateOrGroupRepetition res group
+  | operation == ADD_PIPE_GROUP                =  updatePipeGroup res group
 
 generateSetFromRegex :: [String] -> String -> [String]
 generateSetFromRegex res [] = res
