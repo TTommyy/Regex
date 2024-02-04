@@ -1,4 +1,4 @@
-module Sardin(main) where
+module Main(main) where
 
 import Regex (generateSetFromRegex)
 import SetOperations (isSetOfWordsUniqulyDecodable)
