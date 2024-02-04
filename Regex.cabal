@@ -30,6 +30,6 @@ executable Regex
     other-modules:    Regex, CharFunctions, Handlers, Operations, Parsing, Repetition, SetOperations
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
-    build-depends:    base ^>=4.17.2.0, HUnit >=1.6, containers
+    build-depends:    base >=4.17.2.0, HUnit >=1.6, containers
     hs-source-dirs:   app
     default-language: Haskell2010
