@@ -1,7 +1,5 @@
 -- Operations.hs
 
--- Operacje generowania zbioru
--- Przyjety regex:
 --  abc.. Letters done addToSet
 -- 123…	Digits done addToSet
 -- \d	Any Digit done addORGroupToSet
@@ -40,24 +38,9 @@ module Operations(addToSet
                  ,generateRange) where
 
 import Data.Char (ord
-                 ,chr
-                 ,isAlphaNum
-                 ,isAlpha
-                 ,isDigit
-                 ,isSpace)
+                 ,chr)
 
-
-allASCIICharacters :: String
-allAlphaNum :: String
-letters :: String
-digits :: String
-whiteSpaces :: String
-
-allASCIICharacters = map chr [0..127]
-allAlphaNum = filter isAlphaNum allASCIICharacters
-letters = filter isAlpha allASCIICharacters
-digits =  filter isDigit allASCIICharacters
-whiteSpaces = filter isSpace allASCIICharacters
+import CharFunctions(allASCIICharacters)
 
 -- Hepler methods --
 notGroup :: String -> String

@@ -6,14 +6,12 @@ module Repetition
     updateOrGroupRepetition
   ) where
 
-import Operations(addToSet, addAnyToSet,
-                  addORGroupToSet, addNotORGroupToSet,
-                  addORRangeGroupToSet, addNotORRangeGroupToSet,
-                  addRepetitionsToSet, addRangeRepetitionsToSet,
-                  addOptionalToSet, addMultipleRangeRepetitionsToSet,
-                  generateRange)
+import Operations(addRepetitionsToSet
+                 ,addRangeRepetitionsToSet
+                 ,addMultipleRangeRepetitionsToSet
+                 ,generateRange)
 
-import Data.Char (ord, chr, isAlphaNum, isAlpha, isDigit, isSpace)
+import Data.Char (isDigit)
 import Data.List (elemIndex)
 
 -- helper --

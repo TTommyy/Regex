@@ -77,17 +77,10 @@ import Repetition(updateOneRangeRepetiton
                  ,updateOneRepetition
                  ,updateOrGroupRepetition)
 
-allASCIICharacters :: String
-allAlphaNum :: String
-letters :: String
-digits :: String
-whiteSpaces :: String
-
-allASCIICharacters = map chr [0..127]
-allAlphaNum = filter isAlphaNum allASCIICharacters
-letters = filter isAlpha allASCIICharacters
-digits =  filter isDigit allASCIICharacters
-whiteSpaces = filter isSpace allASCIICharacters
+import CharFunctions(allASCIICharacters
+                    ,allAlphaNum
+                    ,digits
+                    ,whiteSpaces)
 
 -- Helpers --
 splitOnNearest :: Char -> String -> (String, String)

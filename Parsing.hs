@@ -21,26 +21,11 @@ module Parsing (anyDigit
                ,orGroup) where
 
 import Data.List (elemIndex)
-import Data.Char (chr
-                 ,isAlphaNum
-                 ,isAlpha
-                 ,isDigit
-                 ,isSpace)
+import Data.Char (isDigit)
 import Text.Read (readMaybe)
+import CharFunctions(allAlphaNum)
 
-allASCIICharacters :: String
-allAlphaNum :: String
-letters :: String
-digits :: String
-whiteSpaces :: String
-
-allASCIICharacters = map chr [0..127]
-allAlphaNum = filter isAlphaNum allASCIICharacters
-letters = filter isAlpha allASCIICharacters
-digits =  filter isDigit allASCIICharacters
-whiteSpaces = filter isSpace allASCIICharacters
-
--- Helper --
+-- Helpers --
 splitOnNearest :: Char -> String -> (String, String)
 splitOnNearest c str =
   case elemIndex c str of
@@ -52,6 +37,8 @@ readDigit res [] = (read res, [])
 readDigit res s
   | isDigit (head s) = readDigit (res ++ [head s]) (tail s)
   | otherwise = (read res, s)
+
+-- Parisng --
 
 anyDigit :: Char -> String -> Bool
 anyNotDigit :: Char -> String -> Bool
